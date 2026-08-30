@@ -50,3 +50,7 @@ Thumbs.db
 /next-env.d.ts
 /postcss.config.mjs
 /tsconfig.json
+
+.firebase/
+
+.firebase/
