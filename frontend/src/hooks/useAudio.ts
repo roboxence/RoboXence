@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-const AUDIO_SRC = '/assets/background-theme.mp3';
+const AUDIO_SRC = '/assets/space-ambient.mp3';
 const DEFAULT_VOLUME = 0.35; // Ambient background level
 
 export function useAmbientAudio() {
