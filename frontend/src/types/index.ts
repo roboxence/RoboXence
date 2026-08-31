@@ -22,6 +22,7 @@ export interface RoboxenceEvent {
   category: string;
   format: string;
   price?: number;
+  entryFee?: string;
   description: string;
   image: string;
   coordinator: Coordinator;

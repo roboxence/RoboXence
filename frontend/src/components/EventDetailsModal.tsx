@@ -9,7 +9,8 @@ import {
   Sparkles, 
   User, 
   Phone, 
-  Mail
+  Mail,
+  Tag
 } from 'lucide-react';
 import { RoboxenceEvent } from '../types';
 
@@ -105,8 +106,8 @@ export default function EventDetailsModal({
             )}
           </div>
 
-          {/* Key Stats Bar (Fees hidden) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Key Stats Bar */}
+          <div className={`grid grid-cols-1 ${event.entryFee ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-3`}>
             <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center gap-2.5 text-xs font-mono text-cyan-300">
               <Users className="w-4 h-4 text-cyan-400 shrink-0" />
               <div>
@@ -114,6 +115,27 @@ export default function EventDetailsModal({
                 <div className="font-semibold text-white">{event.format}</div>
               </div>
             </div>
+
+            {event.id === 'decode-and-dab' ? (
+              <div className="p-3 rounded-xl bg-slate-950/80 border border-pink-500/40 flex items-center gap-2.5 text-xs font-mono text-pink-300">
+                <Tag className="w-4 h-4 text-pink-400 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-slate-400 uppercase font-mono">Entry Fee Options</div>
+                  <div className="font-bold text-white text-xs space-y-0.5 mt-0.5">
+                    <div>Solo — ₹50/-</div>
+                    <div>With Friend — ₹80/-</div>
+                  </div>
+                </div>
+              </div>
+            ) : event.entryFee ? (
+              <div className="p-3 rounded-xl bg-slate-950/80 border border-cyan-500/40 flex items-center gap-2.5 text-xs font-mono text-cyan-300">
+                <Tag className="w-4 h-4 text-cyan-400 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-slate-400 uppercase font-mono">Entry Fee</div>
+                  <div className="font-bold text-white text-xs mt-0.5">{event.entryFee}</div>
+                </div>
+              </div>
+            ) : null}
 
             <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 flex items-center gap-2.5 text-xs font-mono text-emerald-300">
               <Banknote className="w-4 h-4 text-emerald-400 shrink-0" />

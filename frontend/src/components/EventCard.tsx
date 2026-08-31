@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   Users, 
   Banknote, 
-  ExternalLink
+  ExternalLink,
+  Tag
 } from 'lucide-react';
 import { RoboxenceEvent } from '../types';
 
@@ -69,12 +70,19 @@ export default function EventCard({ event, onViewDetails }: EventCardProps) {
             </p>
           </div>
 
-          {/* Format & Prize Chips (Entry Fees Hidden) */}
+          {/* Format, Entry Fee & Prize Chips */}
           <div className="flex flex-wrap gap-2 text-xs font-mono">
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300">
               <Users className="w-3.5 h-3.5 text-cyan-400" />
               <span>{event.format}</span>
             </div>
+
+            {event.entryFee && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-800 text-cyan-300">
+                <Tag className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{event.entryFee}</span>
+              </div>
+            )}
 
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.15)]">
               <Banknote className="w-3.5 h-3.5 text-emerald-400" />
