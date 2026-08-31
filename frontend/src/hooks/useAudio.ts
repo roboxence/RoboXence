@@ -11,6 +11,7 @@ export function useAmbientAudio() {
   const osc1Ref = useRef<OscillatorNode | null>(null);
   const osc2Ref = useRef<OscillatorNode | null>(null);
   const filterRef = useRef<BiquadFilterNode | null>(null);
+  const userMutedRef = useRef(false);
 
   // Web Audio API Synthesizer (Reliable Sci-Fi Atmospheric Drone Fallback)
   const startSynth = useCallback(() => {
@@ -86,13 +87,14 @@ export function useAmbientAudio() {
       const audio = new Audio(AUDIO_SRC);
       audio.loop = true;
       audio.volume = DEFAULT_VOLUME;
-      audio.preload = 'none'; // No preload until user interacts
+      audio.preload = 'auto';
       audioElementRef.current = audio;
     }
     return audioElementRef.current;
   }, []);
 
   const startAudio = useCallback(() => {
+    if (userMutedRef.current) return;
     const audio = getAudioElement();
     if (audio) {
       const playPromise = audio.play();
@@ -124,11 +126,70 @@ export function useAmbientAudio() {
 
   const toggleAudio = useCallback(() => {
     if (isPlaying) {
+      userMutedRef.current = true;
       stopAudio();
     } else {
-      startAudio();
+      userMutedRef.current = false;
+      const audio = getAudioElement();
+      if (audio) {
+        audio.play()
+          .then(() => setIsPlaying(true))
+          .catch(() => startSynth());
+      } else {
+        startSynth();
+      }
     }
-  }, [isPlaying, startAudio, stopAudio]);
+  }, [isPlaying, getAudioElement, startSynth, stopAudio]);
+
+  // Autoplay attempt immediately on mount + fallback on first user interaction
+  useEffect(() => {
+    let cleanupListeners: (() => void) | null = null;
+
+    const tryPlay = () => {
+      if (userMutedRef.current) return;
+      const audio = getAudioElement();
+      if (!audio) return;
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            if (cleanupListeners) cleanupListeners();
+          })
+          .catch(() => {
+            // Autoplay blocked by browser policy; wait for first interaction
+            const events = ['click', 'touchstart', 'keydown', 'scroll'];
+            const handleInteraction = () => {
+              if (userMutedRef.current) return;
+              audio.play()
+                .then(() => {
+                  setIsPlaying(true);
+                })
+                .catch(() => {});
+              cleanup();
+            };
+
+            const cleanup = () => {
+              events.forEach((evt) => {
+                window.removeEventListener(evt, handleInteraction);
+              });
+            };
+
+            cleanupListeners = cleanup;
+            events.forEach((evt) => {
+              window.addEventListener(evt, handleInteraction, { once: true, passive: true });
+            });
+          });
+      }
+    };
+
+    tryPlay();
+
+    return () => {
+      if (cleanupListeners) cleanupListeners();
+    };
+  }, [getAudioElement]);
 
   // Clean up on component unmount
   useEffect(() => {
