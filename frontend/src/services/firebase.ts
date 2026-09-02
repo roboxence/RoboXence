@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { getAnalytics, isSupported, logEvent, Analytics } from 'firebase/analytics';
 import { RoboxenceEvent, FestConfig } from '../types';
 
 // Fallback / Initial Seed Data
@@ -211,16 +212,33 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "roboxence-2k26.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "357463046442",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:357463046442:web:b711f7d34213277462c653",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-821TP9MJ1L",
 };
 
 let db: any = null;
+let analytics: Analytics | null = null;
 
 try {
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   db = getFirestore(app);
+
+  if (typeof window !== 'undefined') {
+    isSupported()
+      .then((supported) => {
+        if (supported) {
+          // getAnalytics automatically sends the initial page_view event via GA4 Enhanced Measurement
+          analytics = getAnalytics(app);
+        }
+      })
+      .catch((err) => {
+        console.warn("Analytics not supported in this environment:", err);
+      });
+  }
 } catch (e) {
-  console.warn("Firestore initialization running in local fallback mode:", e);
+  console.warn("Firestore/Analytics initialization running in local fallback mode:", e);
 }
+
+export { analytics };
 
 export async function fetchEventsFromFirestore(): Promise<RoboxenceEvent[]> {
   try {
